@@ -4,6 +4,14 @@ import { Link } from "react-router-dom";
 import { getPosts } from "~/models/post.server";
 import type { LoaderFunction } from "@remix-run/node";
 
+interface Post {
+  id: string;
+  slug: string;
+  title: string;
+  markdown: string;
+  posts?: Post[];
+}
+
 export const loader: LoaderFunction = async () => {
   const posts = await getPosts();
 
@@ -22,22 +30,14 @@ export const loader: LoaderFunction = async () => {
     */
 };
 
-interface Post {
-  _uid: string;
-  slug: string;
-  title: string;
-}
-
 export default function PostsRoute() {
-  const { posts } = useLoaderData();
-
-  console.log(useLoaderData());
+  const { posts } = useLoaderData() as Post;
 
   return (
     <main>
       <ul>
-        {posts.map((post: Post) => (
-          <li key={post._uid}>
+        {posts?.map((post: Post) => (
+          <li key={post.id}>
             <Link to={post.slug}>{post.title}</Link>
           </li>
         ))}
