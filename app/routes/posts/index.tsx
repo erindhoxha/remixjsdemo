@@ -1,8 +1,9 @@
 import { useLoaderData } from "@remix-run/react";
 import { json } from "@remix-run/server-runtime";
 import { Link } from "react-router-dom";
-import { getPosts } from "~/models/post.server";
+import { getPostListings } from "~/models/post.server";
 import type { LoaderFunction } from "@remix-run/node";
+import { useOptionalUser } from "~/utils";
 
 interface Post {
   id: string;
@@ -13,32 +14,29 @@ interface Post {
 }
 
 export const loader: LoaderFunction = async () => {
-  const posts = await getPosts();
-
+  const posts = await getPostListings();
   return json({ posts });
-
-  // This ^ replaces this ->
-
-  /* 
-    const postsString = JSON.stringify( { posts } );
-
-    return new Response(postsString, {
-        headers: {
-            'Content-Type': "application/json",
-        }
-    })
-    */
 };
 
 export default function PostsRoute() {
   const { posts } = useLoaderData() as Post;
+  const user = useOptionalUser();
+
+  const isAdmin = user?.email == ENV.ADMIN_EMAIL;
 
   return (
     <main>
+      {isAdmin ? (
+        <Link to="admin" className="text-red-600 underline">
+          Admin
+        </Link>
+      ) : null}
       <ul>
         {posts?.map((post: Post) => (
-          <li key={post.id}>
-            <Link to={post.slug}>{post.title}</Link>
+          <li key={post.slug}>
+            <Link prefetch="intent" to={post.slug}>
+              {post.title}
+            </Link>
           </li>
         ))}
       </ul>

@@ -54,7 +54,9 @@ async function seed() {
     {
       slug: "my-third-post",
       title: "3rd post",
-      markdown: `# I am a markdown`.trim(),
+      markdown: `## I am a markdown
+      #asd
+      `.trim(),
     },
     {
       slug: "my-fourth-post",
