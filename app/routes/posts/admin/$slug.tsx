@@ -1,5 +1,6 @@
 import {
   Form,
+  Link,
   useActionData,
   useLoaderData,
   useTransition,
@@ -7,12 +8,12 @@ import {
 import { json } from "@remix-run/node";
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
-import { createPost, getPost } from "~/models/post.server";
+import { createPost, getPost, updatePost } from "~/models/post.server";
 import { requireAdminUser } from "~/session.server";
 import { marked } from "marked";
 import invariant from "tiny-invariant";
 
-const inputClassName = `w-full rounded border border-gray-500 px-2 py-2`;
+const inputClassName = `w-full rounded border border-gray-300 px-2 py-2`;
 
 interface Post {
   id: string;
@@ -27,19 +28,25 @@ interface Post {
 type LoaderData = {
   title?: string;
   html: string;
+  slug: string | undefined;
+  markdown: string | undefined;
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   await requireAdminUser(request);
-  if (params.slug == "new") {
+  if (params.slug === "new") {
     return json({});
   } else {
     const { slug } = params;
     invariant(slug, "slug is required");
     const post = (await getPost(slug)) as Post | null;
     const html = marked(post?.markdown as string);
-    console.log(post);
-    return json<LoaderData>({ title: post?.title, html });
+    return json<LoaderData>({
+      title: post?.title,
+      html,
+      slug: post?.slug,
+      markdown: post?.markdown,
+    });
   }
 };
 
@@ -78,7 +85,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   if (params.slug === "new") {
     await createPost({ title, slug, markdown });
   } else {
-    // todo update post
+    await updatePost({ title, slug, markdown }, slug);
   }
 
   return redirect("posts/admin");
@@ -88,30 +95,47 @@ export default function NewPostRoute() {
   const transition = useTransition();
   const isCreating = Boolean(transition.submission);
   const errors = useActionData() as ActionData;
-  const { title, html } = useLoaderData();
+  const { title, slug, markdown } = useLoaderData();
   return (
     <>
-      {title}
-      {html}
+      <div className="article mb-4 mt-4">
+        {title ? (
+          <h1 className="text-2xl">Update post:</h1>
+        ) : (
+          <h1 className="text-2xl">Create post:</h1>
+        )}
+      </div>
       {/* <Link to="../">Go back</Link> */}
-      <Form method="post" className="w-full">
-        <p>
+      <Form method="post" className="w-full" key={slug ?? "new"}>
+        <p className="mb-4">
           <label htmlFor="title">
             Post Title:{" "}
             {errors?.title ? (
               <em className="text-red-500">{errors?.title}</em>
             ) : null}
-            <input type="text" name="title" className={inputClassName} />
+            <input
+              placeholder={title ?? title}
+              defaultValue={title ?? title}
+              type="text"
+              name="title"
+              className={inputClassName}
+            />
           </label>
         </p>
 
-        <p>
+        <p className="mb-4">
           <label htmlFor="slug">
             Post Slug:
             {errors?.slug ? (
               <em className="text-red-500">{errors?.slug}</em>
             ) : null}
-            <input type="text" name="slug" className={inputClassName} />
+            <input
+              placeholder={slug ?? slug}
+              defaultValue={slug ?? slug}
+              type="text"
+              name="slug"
+              className={inputClassName}
+            />
           </label>
         </p>
         <p>
@@ -120,7 +144,13 @@ export default function NewPostRoute() {
             {errors?.markdown ? (
               <em className="text-red-500">{errors?.markdown}</em>
             ) : null}
-            <textarea rows={8} name="markdown" className={inputClassName} />
+            <textarea
+              placeholder={markdown ?? markdown}
+              defaultValue={markdown ?? markdown}
+              rows={8}
+              name="markdown"
+              className={inputClassName}
+            />
           </label>
         </p>
         {/* We can either disable, or hide it completely with isCreating */}
@@ -130,8 +160,18 @@ export default function NewPostRoute() {
           <input
             className="btn-primary pointer rounded bg-blue-500 p-2 px-6 text-white"
             type="submit"
-            value="Create Post"
+            value={`${title ? "Update Post" : "Create Post"}`}
           />
+        )}
+        {title ? (
+          <Link
+            className="btn-secondary pointer ml-2 rounded p-2 px-6 text-black"
+            to="/posts/admin/new"
+          >
+            + Create Post
+          </Link>
+        ) : (
+          ""
         )}
       </Form>
     </>

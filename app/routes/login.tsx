@@ -8,6 +8,7 @@ import { verifyLogin } from "~/models/user.server";
 import { safeRedirect, validateEmail } from "~/utils";
 
 export async function loader({ request }: LoaderArgs) {
+  console.log("logging in!");
   const userId = await getUserId(request);
   if (userId) return redirect("/");
   return json({});
