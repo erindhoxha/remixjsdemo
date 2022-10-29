@@ -4,6 +4,8 @@ import type { LoaderFunction } from "@remix-run/node";
 import { getPost } from "~/models/post.server";
 import { marked } from "marked";
 import invariant from "tiny-invariant";
+import Header from "~/components/header";
+import { useOptionalUser } from "~/utils";
 
 interface Post {
   id: string;
@@ -30,10 +32,16 @@ export const loader: LoaderFunction = async ({ params }) => {
 
 export default function PostRoute() {
   const { title, html } = useLoaderData();
+  const user = useOptionalUser();
   return (
-    <main className="mx-auto max-w-4xl">
-      <h1 className="mt-2 border-b-2 text-center text-3xl">{title}</h1>
-      <div dangerouslySetInnerHTML={{ __html: html }}></div>
-    </main>
+    <>
+      <Header name={user?.email} />
+      <main className="mx-auto max-w-4xl p-4">
+        <h1 className="mt-2 mb-4 border-b-2 pb-4 text-left text-3xl">
+          {title}
+        </h1>
+        <div dangerouslySetInnerHTML={{ __html: html }}></div>
+      </main>
+    </>
   );
 }

@@ -56,7 +56,7 @@ export default function NewNotePage() {
       }}
     >
       <div>
-        <label className="flex w-full flex-col gap-1">
+        <label className="mb-2 flex w-full flex-col gap-1">
           <span>Title: </span>
           <input
             ref={titleRef}
