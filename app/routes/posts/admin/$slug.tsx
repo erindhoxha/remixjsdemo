@@ -68,8 +68,6 @@ export const action: ActionFunction = async ({ request, params }) => {
   const data = Object.fromEntries(await request.formData()) as Request;
   const { title, slug, markdown } = data;
 
-  console.log(title, slug, markdown);
-
   await requireAdminUser(request);
 
   const errors: ActionData = {
@@ -96,8 +94,11 @@ export const action: ActionFunction = async ({ request, params }) => {
 export default function NewPostRoute() {
   const transition = useTransition();
   const isCreating = transition.submission?.formData.get("intent") === "create";
+  const isUpdating = transition.submission?.formData.get("intent") === "update";
+  const data = useLoaderData();
+  const { title, markdown, slug } = data;
+  const isNewPost = !slug;
   const errors = useActionData() as ActionData;
-  const { title, slug, markdown } = useLoaderData();
   return (
     <>
       <div className="article mb-4 mt-4">
@@ -159,11 +160,16 @@ export default function NewPostRoute() {
         {isCreating ? (
           ""
         ) : (
-          <input
-            className="btn-primary pointer rounded bg-blue-500 p-2 px-6 text-white"
+          <button
             type="submit"
-            value={`${title ? "Update Post" : "Create Post"}`}
-          />
+            name="intent"
+            value={isNewPost ? "create" : "update"}
+            className="rounded bg-blue-500 py-2 px-4 text-white hover:bg-blue-500"
+            disabled={isCreating || isUpdating}
+          >
+            {isNewPost ? (isCreating ? "Creating..." : "Create Post") : null}
+            {isNewPost ? null : isUpdating ? "Updating..." : "Update Post"}
+          </button>
         )}
         {title ? (
           <Link
