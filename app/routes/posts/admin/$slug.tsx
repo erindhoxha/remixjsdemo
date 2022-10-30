@@ -68,6 +68,8 @@ export const action: ActionFunction = async ({ request, params }) => {
   const data = Object.fromEntries(await request.formData()) as Request;
   const { title, slug, markdown } = data;
 
+  console.log(title, slug, markdown);
+
   await requireAdminUser(request);
 
   const errors: ActionData = {
@@ -85,7 +87,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   if (params.slug === "new") {
     await createPost({ title, slug, markdown });
   } else {
-    await updatePost({ title, slug, markdown }, slug);
+    await updatePost({ slug, title, markdown }, params.slug);
   }
 
   return redirect("posts/admin");
@@ -93,7 +95,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 
 export default function NewPostRoute() {
   const transition = useTransition();
-  const isCreating = Boolean(transition.submission);
+  const isCreating = transition.submission?.formData.get("intent") === "create";
   const errors = useActionData() as ActionData;
   const { title, slug, markdown } = useLoaderData();
   return (
