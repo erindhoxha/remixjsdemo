@@ -12,8 +12,23 @@ import { createPost, getPost, updatePost } from "~/models/post.server";
 import { requireAdminUser } from "~/session.server";
 import { marked } from "marked";
 import invariant from "tiny-invariant";
+// import AdminIndexRoute from "./index";
 
 const inputClassName = `w-full rounded border border-gray-300 px-2 py-2`;
+
+// export function ErrorBoundary({ error }) {
+//   return (
+//     <html>
+//       <head>
+//         <title>Oh no!</title>
+//       </head>
+//       <body className="m-4">
+//         <h1 className="text-2xl">Something went wrongggg (from SLUG) !</h1>
+//         <p>{error.message}</p>
+//       </body>
+//     </html>
+//   );
+// }
 
 interface Post {
   id: string;
@@ -33,6 +48,8 @@ type LoaderData = {
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
+  // throw new Error("I am a failure!");
+
   await requireAdminUser(request);
   if (params.slug === "new") {
     return json({});
@@ -99,6 +116,7 @@ export default function NewPostRoute() {
   const { title, markdown, slug } = data;
   const isNewPost = !slug;
   const errors = useActionData() as ActionData;
+  console.log(errors);
   return (
     <>
       <div className="article mb-4 mt-4">

@@ -31,6 +31,23 @@ export async function loader({ request }: LoaderArgs) {
   });
 }
 
+export function ErrorBoundary({ error }) {
+  return (
+    <html>
+      <head>
+        <title>Oh no!</title>
+        <Meta />
+        <Links />
+      </head>
+      <body className="m-4">
+        <h1 className="text-2xl">Something went wrongggggg!</h1>
+        <p>{error.message}</p>
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
 export default function App() {
   const data = useLoaderData();
   return (

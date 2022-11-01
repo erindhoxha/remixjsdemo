@@ -1,10 +1,11 @@
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, Outlet } from "@remix-run/react";
 import { json } from "@remix-run/server-runtime";
 import { Link } from "react-router-dom";
 import { getPostListings } from "~/models/post.server";
 import type { LoaderFunction } from "@remix-run/node";
 import { useOptionalUser } from "~/utils";
 import Header from "~/components/header";
+import Tada from "./tada";
 
 interface Post {
   id: string;
@@ -37,6 +38,7 @@ export default function PostsRoute() {
             Admin page
           </Link>
         ) : null}
+        <Outlet />
         <h1 className="mt-4 mb-2 text-2xl font-medium">Posts</h1>
         <ul className="mt-1 flex w-full flex-col">
           {posts?.map((post: Post) => (

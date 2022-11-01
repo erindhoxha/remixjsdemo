@@ -7,11 +7,6 @@ import { getPostListings } from "~/models/post.server";
 import { requireAdminUser } from "~/session.server";
 import { useOptionalUser } from "~/utils";
 
-// type Post = {
-//   slug: string;
-//   title: string;
-// };
-
 type LoaderData = {
   posts: Awaited<ReturnType<typeof getPostListings>>;
 };
